@@ -1,7 +1,7 @@
 /* Token Radar v2 — ink-navy console, teal radar accent, amber for the watchlist, violet for value. */
 :root {
   --bg:#090e1a; --bg2:#0d1424; --panel:#111a2d; --panel2:#16213a; --line:#1f2c47; --line2:#2a3a5c;
-  --ink:#e7edf8; --mute:#8d9bb8; --dim:#5d6b88; --teal:#37e2c4; --amber:#ffb547; --violet:#9b8cff;
+  --ink:#e7edf8; --mute:#8d9bb8; --dim:#7d8bab; --teal:#37e2c4; --amber:#ffb547; --violet:#9b8cff;
   --green:#4fd98b; --red:#ff6b7d; --blue:#5aa9ff; --sans:"DejaVu Sans", "Segoe UI", system-ui, sans-serif;
   --cond:"DejaVu Sans Condensed", "Arial Narrow", "DejaVu Sans", sans-serif;
   --mono:"DejaVu Sans Mono", ui-monospace, Menlo, monospace; --r:10px;
@@ -131,6 +131,7 @@ h1 span { color:var(--teal);font-family:var(--mono);font-size:14px;border:1px so
 .sc .dot { fill:#3a4866;opacity:.35;cursor:pointer; }
 .sc .dot.a { fill:var(--teal);opacity:.75;stroke:#0b1222;stroke-width:.6; }
 .sc .dot.w { fill:var(--amber);opacity:.85;stroke:#0b1222;stroke-width:.6; }
+.sc .ld { stroke:#e7edf866;stroke-width:.7; }
 .sc .lb { fill:var(--ink);font:700 9.5px var(--sans);paint-order:stroke;stroke:var(--panel);stroke-width:3px; }
 .lg { display:flex;gap:14px;font-size:11px;color:var(--mute);margin-top:4px; }
 .lg i { display:inline-block;width:8px;height:8px;border-radius:50%;background:#3a4866;margin-right:5px; }

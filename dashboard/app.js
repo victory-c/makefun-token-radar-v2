@@ -207,10 +207,15 @@
       var on = inView[r.p.slug], rad = 2 + 9 * Math.sqrt(r.v.implied / max);
       return '<circle cx="' + x(r.p.tvl_usd).toFixed(1) + '" cy="' + y(r.p.change_7d).toFixed(1) + '" r="' + rad.toFixed(1) + '" class="dot' + (on ? (r.watch ? ' w' : ' a') : '') + '" data-slug="' + esc(r.p.slug) + '"/>';
     }).join('');
-    var lab = rows.slice().sort(function (a, b) { return a.rank - b.rank; }).slice(0, 4).map(function (r) {
-      var cx = x(r.p.tvl_usd), right = cx > W - 110;
-      return '<text x="' + (cx + (right ? -12 : 12)) + '" y="' + (y(r.p.change_7d) + 3) + '" class="lb" text-anchor="' + (right ? 'end' : 'start') + '">' + esc(r.p.name) + '</text>';
-    }).join('');
+    // Label the top four in view; labels stack 12px apart so they never collide, with a leader to their dot.
+    var lastY = -1e9, lab = rows.slice().sort(function (a, b) { return a.rank - b.rank; }).slice(0, 4)
+      .map(function (r) { return { r: r, cx: x(r.p.tvl_usd), cy: y(r.p.change_7d) }; })
+      .sort(function (a, b) { return a.cy - b.cy; }).map(function (o) {
+        var right = o.cx > W - 150, ly = Math.max(o.cy + 3, lastY + 12, T + 8), lx = o.cx + (right ? -14 : 14);
+        lastY = ly;
+        return '<line x1="' + o.cx.toFixed(1) + '" y1="' + o.cy.toFixed(1) + '" x2="' + (lx + (right ? 3 : -3)) + '" y2="' + (ly - 3) + '" class="ld"/>' +
+          '<text x="' + lx + '" y="' + ly + '" class="lb" text-anchor="' + (right ? 'end' : 'start') + '">' + esc(o.r.p.name) + '</text>';
+      }).join('');
     return '<div class="card"><h3>Radar map <small>TVL (log) × 7-day change · size = implied value</small></h3><svg viewBox="0 0 ' + W + ' ' + H + '" class="sc">' + g + dots + lab + '</svg>' +
       '<div class="lg"><span><i class="w"></i>watchlist</span><span><i class="a"></i>below floor</span><span><i></i>filtered out</span></div></div>';
   }
