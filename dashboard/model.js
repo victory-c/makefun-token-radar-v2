@@ -114,9 +114,11 @@
       'Liquidity Manager', 'Leveraged Farming', 'Farm', 'Staking Pool', 'Governance Incentives', 'Restaking', 'CeDeFi',
       'Anchor BTC', 'Decentralized BTC', 'Indexes', 'Treasury Manager', 'Liquidity Automation'],
     lend: ['Lending', 'CDP', 'CDP Manager', 'Collateral Markets', 'Collateral Management', 'Uncollateralized Lending', 'NFT Lending', 'Dual-Token Stablecoin'],
-    trade: ['Dexs', 'Derivatives', 'Options', 'Prediction Market', 'Launchpad', 'Synthetics', 'Options Vault', 'DEX Aggregator',
+    predict: ['Prediction Market'],
+    pay: ['Payments', 'Crypto Card Issuer'],
+    trade: ['Dexs', 'Derivatives', 'Options', 'Launchpad', 'Synthetics', 'Options Vault', 'DEX Aggregator',
       'Perps', 'OTC Marketplace', 'Interest Rate Derivatives'],
-    rwa: ['RWA', 'Insurance', 'Payments', 'RWA Lending', 'Stablecoin', 'Crypto Card Issuer']
+    rwa: ['RWA', 'Insurance', 'RWA Lending', 'Stablecoin']
   };
   function archetype(cat) {
     for (var k in ARCH) if (ARCH[k].indexOf(cat) >= 0) return k;
@@ -126,7 +128,8 @@
     var t = clamp(tvl * 1e-5, 250, 10000), mag = Math.pow(10, Math.floor(Math.log10(t)));
     return Math.round(t / mag * 2) / 2 * mag;
   }
-  function usd(n) {
+  function usd(n) { return usd1(n).replace(/\.0(?=[KMB])/, ''); }
+  function usd1(n) {
     var a = Math.abs(n);
     if (a >= 1e9) return '$' + (n / 1e9).toFixed(a >= 1e10 ? 1 : 2) + 'B';
     if (a >= 1e6) return '$' + (n / 1e6).toFixed(a >= 1e8 ? 0 : 1) + 'M';
@@ -144,7 +147,8 @@
     var exitTvl = usd(p.tvl_usd * 0.7), a = archetype(p.category), N = p.name;
     var s = [];
     function step(title, text, cost, time) { s.push({ title: title, text: text, cost: cost, time: time }); }
-    step('Fund', 'Bridge or withdraw ' + usd(ticket) + ' in USDC plus ' + usd(Math.max(1, gas * 12)) + ' of ' + gasTok + ' for gas to a fresh wallet on ' + chain + ' that you use only for ' + N + '.',
+    var asset = chain === 'Bitcoin' ? 'BTC' : 'USDC';
+    step('Fund', 'Bridge or withdraw ' + usd(ticket) + ' in ' + asset + ' plus ' + usd(Math.max(1, gas * 12)) + ' of ' + gasTok + ' for gas to a fresh wallet on ' + chain + ' that you use only for ' + N + '.',
       usd(Math.max(0.5, gas * 2 + 1)), '15 min');
     if (a === 'vault') {
       step('Deposit', 'Open ' + N + '\'s app, pick its largest USDC or ETH vault on ' + chain + ' (check the curator and the withdrawal queue first), approve and deposit the full ' + usd(ticket) + '.', usd(gas * 2), '10 min');
@@ -158,6 +162,14 @@
       step('Provide', 'Add ' + usd(ticket * 0.6) + ' of liquidity to ' + N + '\'s deepest stable or major pair on ' + chain + ' in a wide range, so it earns fees without constant rebalancing.', usd(gas * 2), '15 min');
       step('Trade', 'Route ' + usd(ticket * 2) + ' of volume a week through ' + N + ' with the other ' + usd(ticket * 0.4) + ': swaps or small hedged positions, never size you cannot afford to lose to fees.', usd(ticket * 2 * 0.0015 * 4 + gas * 8) + '/month', '10 min/week');
       step('Hold', 'Keep the LP live ' + hold + ' days; active-week streaks and LP-days are what most volume programs count.', usd(carry) + ' carry', hold + ' days');
+    } else if (a === 'predict') {
+      step('Position', 'Split ' + usd(ticket * 0.5) + ' across 4–6 liquid markets on ' + N + ' that resolve within 60 days; prefer prices between 20 and 80 ¢ so the stake is not dead money.', usd(gas * 6 + ticket * 0.5 * 0.01), '30 min');
+      step('Make', 'Rest limit orders with another ' + usd(ticket * 0.3) + ' inside the spread of two deep markets: liquidity-reward and volume programs both count resting size.', usd(gas * 4), '15 min/week');
+      step('Roll', 'As markets resolve, roll the proceeds into new ones for ' + hold + ' days so the account stays active every week.', usd(carry) + ' carry', hold + ' days');
+    } else if (a === 'pay') {
+      step('Open', 'Open ' + N + '\'s wallet or account on ' + chain + ' and move ' + usd(ticket * 0.5) + ' into it; keep the rest as reserve.', usd(gas * 2), '20 min');
+      step('Spend', 'Route 4–8 real payments a month (' + usd(Math.max(20, ticket * 0.02)) + ' each) through it: usage, not balance, is what payment networks reward.', usd(gas * 6) + '/month', '10 min/week');
+      step('Hold', 'Keep the account funded and active ' + hold + ' days.', usd(carry * 0.5) + ' carry', hold + ' days');
     } else if (a === 'rwa') {
       step('Onboard', 'Complete ' + N + '\'s onboarding (KYC or accredited check where it applies); without it the mint step is closed to you.', '$0', '1–3 days');
       step('Mint', 'Mint or buy ' + usd(ticket) + ' of its yield-bearing asset on ' + chain + ' and keep it in the same wallet.', usd(gas * 2 + ticket * 0.001), '20 min');
