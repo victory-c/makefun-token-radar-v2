@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Radar v2 — pre-token protocols ranked by implied value</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 40 40" aria-hidden="true">
+      <circle cx="20" cy="20" r="18" class="ring"/><circle cx="20" cy="20" r="11" class="ring"/><circle cx="20" cy="20" r="4" class="ring"/>
+      <path d="M20 20 L20 2 A18 18 0 0 1 35.6 11 Z" class="sweep"/><circle cx="29" cy="12" r="2.4" class="blip"/>
+    </svg>
+    <div>
+      <h1>Token Radar <span>v2</span></h1>
+      <p>Protocols with no token recorded, ranked by what their token would be worth if today's record held</p>
+    </div>
+  </div>
+  <div class="meta" id="meta"></div>
+</header>
+
+<section class="kpis" id="kpis" aria-label="Board totals"></section>
+
+<nav class="bar" aria-label="Views and filters">
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <div class="filters" id="filters">
+    <input id="q" type="search" placeholder="Search name, chain…" aria-label="Search">
+    <select id="cat" aria-label="Category"></select>
+    <select id="chain" aria-label="Chain"></select>
+    <div class="seg" id="tier" role="group" aria-label="Tier">
+      <button data-v="">All</button><button data-v="watch">Watchlist</button><button data-v="below">Below floor</button>
+    </div>
+    <div class="seg" id="win" role="group" aria-label="Launch window">
+      <button data-v="">Any</button><button data-v="Fresh">Fresh</button><button data-v="Prime">Prime</button><button data-v="Late">Late</button>
+    </div>
+    <label class="chk"><input type="checkbox" id="mom"> 7d inflow</label>
+    <button id="reset" class="ghost">Reset</button>
+  </div>
+</nav>
+
+<div class="chips" id="chips"></div>
+
+<main class="layout">
+  <section class="panel tablewrap" id="main" aria-live="polite"></section>
+  <aside class="rail" id="rail"></aside>
+</main>
+
+<footer class="foot" id="foot"></footer>
+
+<div class="scrim" id="scrim" hidden></div>
+<section class="detail" id="detail" role="dialog" aria-modal="true" aria-labelledby="d-name" hidden></section>
+
+<script src="../data.js"></script>
+<script src="model.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
