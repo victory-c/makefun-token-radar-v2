@@ -276,7 +276,9 @@
     var plan = f.steps.map(function (s, i) {
       return '<li><i>' + (i + 1) + '</i><div><b>' + esc(s.title) + '</b><p>' + esc(s.text) + '</p></div><span class="pill cost">' + esc(s.cost) + '</span><span class="pill time">' + esc(s.time) + '</span></li>';
     }).join('');
-    var pos = R.rows.indexOf(r), prev = R.rows[pos - 1], next = R.rows[pos + 1];
+    var list = view(), pos = list.indexOf(r);
+    if (pos < 0) { list = R.rows; pos = list.indexOf(r); }
+    var prev = list[pos - 1], next = list[pos + 1];
     box.innerHTML =
       '<header class="dh"><div><div class="rkb">#' + r.rank + '<small>of ' + R.rows.length + '</small></div></div><div class="dt"><h2 id="d-name">' + esc(p.name) + '</h2>' +
       '<div class="tags"><span class="tag">' + esc(p.category || 'Uncategorised') + '</span>' + (r.watch ? '<span class="tag w">WATCHLIST</span>' : '<span class="tag b">BELOW FLOOR</span>') +
