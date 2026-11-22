@@ -106,7 +106,7 @@
       ['Implied value in view', usd(sum), rows.length + ' of ' + R.rows.length + ' pre-token rows', 'v'],
       ['Top implied value', top ? usd(top.v.implied) : '—', top ? '#' + top.rank + ' ' + esc(top.p.name) : 'no rows', ''],
       ['TVL with no token', usd(tvl), 'avg ' + mult(tvl ? sum / tvl : 0) + ' implied / TVL', ''],
-      ['Early-user pool @ ' + R.params.DROP_SHARE * 100 + '%', usd(pool), 'what farmers would split if values held', 'g'],
+      ['Early-user pool @ ' + R.params.DROP_SHARE * 100 + '%', usd(pool), 'early users\' share if values held', 'g'],
       ['7-day inflow', rows.length ? Math.round(up / rows.length * 100) + '%' : '—', up + ' rows grew TVL this week', ''],
       ['Peer multiple (all comps)', mult(R.peers.global), R.peers.n + ' traded tokens with market cap', 'c']
     ];
@@ -235,6 +235,27 @@
   }
 
   /* ---------- detail ---------- */
+  /** Percentile of a row on the board for one figure, and the data-derived flags a farmer should read first. */
+  function pctile(r, k) { var x = KEYS[k](r), n = 0; R.rows.forEach(function (o) { if (KEYS[k](o) < x) n++; }); return n / (R.rows.length - 1); }
+  function signals(r) {
+    var p = r.p, v = r.v, f = [];
+    if (p.change_7d !== null && p.change_7d < -8) f.push(['dn', 'TVL left this week (' + pct(p.change_7d) + ')']);
+    if (p.change_7d > 8) f.push(['up', 'Strong 7-day inflow (' + pct(p.change_7d) + ')']);
+    if (p.chains.length === 1) f.push(['', 'Single chain: ' + esc(p.chains[0])]);
+    if (v.months !== null && v.months < 3) f.push(['', 'Listed under 3 months ago']);
+    if (v.months === null) f.push(['', 'Listing date not recorded']);
+    if (v.months > 30) f.push(['', 'Over 2½ years with no token: may never launch one']);
+    if (v.peerN < 3) f.push(['', 'Thin comps: multiple leans on the ' + v.peerN + '-comp category + group']);
+    if (p.tvl_usd < R.floor * 1.2 && r.watch) f.push(['', 'TVL within 20% of the watchlist floor']);
+    if (!f.length) f.push(['up', 'No red flags in the snapshot\'s figures']);
+    var bars = [['TVL', 'tvl'], ['7d change', 'd7'], ['Months tokenless', 'months'], ['Implied value', 'implied']].map(function (b) {
+      var q = pctile(r, b[1]);
+      return '<div class="sg"><span>' + b[0] + '</span><s><i style="left:' + (q * 100).toFixed(1) + '%"></i></s><b>p' + Math.round(q * 100) + '</b></div>';
+    }).join('');
+    return '<h4>Signals <small>percentile among the ' + R.rows.length + ' board rows</small></h4>' + bars +
+      '<div class="flags">' + f.map(function (x) { return '<span class="flag ' + x[0] + '">' + x[1] + '</span>'; }).join('') + '</div>';
+  }
+
   function renderDetail() {
     var r = bySlug[st.p], box = $('detail');
     if (!r) { box.hidden = true; $('scrim').hidden = true; return; }
@@ -264,7 +285,7 @@
       '<div class="nav"><button data-go="' + (prev ? esc(prev.p.slug) : '') + '"' + (prev ? '' : ' disabled') + '>← prev</button><button data-go="' + (next ? esc(next.p.slug) : '') + '"' + (next ? '' : ' disabled') + '>next →</button><button class="x" data-close="1" aria-label="Close">×</button></div></header>' +
       '<div class="dg"><div class="col">' +
       '<div class="hero"><div><span>Implied value</span><b>' + usd(v.implied) + '</b></div><div><span>Early-user pool (' + R.params.DROP_SHARE * 100 + '%)</span><b class="g">' + usd(v.pool) + '</b></div><div><span>Pool / TVL</span><b>' + (v.dropYield * 100).toFixed(2) + '%</b></div></div>' +
-      '<h4>How the value is built</h4>' + wf + '<h4>Category comps <small>' + esc(p.category || '') + ' tokens that trade</small></h4>' + peers + '</div>' +
+      '<h4>How the value is built</h4>' + wf + '<h4>Category comps <small>' + esc(p.category || '') + ' tokens that trade</small></h4>' + peers + signals(r) + '</div>' +
       '<div class="col"><h4>Farm plan <small>' + f.archetype + ' playbook on ' + esc(f.chain) + '</small></h4>' +
       '<div class="ps"><div><span>Ticket</span><b>' + usd(f.ticket) + '</b></div><div><span>All-in cost</span><b>≈ ' + usd(f.cost) + '</b></div><div><span>Time</span><b>~1 h + ' + f.hold + ' d</b></div><div><span>Est. drop on ticket</span><b class="g">' + usd(f.share) + '</b><small>≈ ' + Math.round(f.share / f.ticket * 365 / f.hold * 100) + '%/yr over ' + f.hold + ' d</small></div></div>' +
       '<ol class="steps">' + plan + '</ol><p class="note">Est. drop = pool × ticket / (TVL + ticket), if the implied value held at launch. Cost counts gas, fees and 5%/yr carry; it is no forecast that a token will launch.</p></div></div>';

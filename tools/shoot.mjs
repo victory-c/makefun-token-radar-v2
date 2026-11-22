@@ -8,11 +8,11 @@ import { homedir } from 'node:os';
 
 const [outDir = 'out', dest = 'screenshots'] = process.argv.slice(2);
 const CHROME = process.env.CHROME ?? join(homedir(), '.cache/ms-playwright/chromium-1255/chrome-linux64/chrome');
-const W = 1440, H = +(process.env.H ?? 1000);
+const W = 1440, H = +(process.env.H ?? 1060);
 const SHOTS = [
-  ['1-board.png', ''],
-  ['2-detail.png', 'p=gauntlet'],
-  ['3-filtered.png', 'tier=below&mom=1&sort=implied&dir=-1'],
+  ['1-board.png', '', H],
+  ['2-detail.png', 'p=gauntlet', 840],
+  ['3-filtered.png', 'win=Fresh&mom=1&sort=d7&dir=-1', H],
 ];
 const extra = process.env.SHOTS ? JSON.parse(process.env.SHOTS) : null;
 
@@ -55,12 +55,13 @@ const probe = `(() => {
     wide: [...document.querySelectorAll('body *')].filter((e) => !e.closest('svg') && e.getBoundingClientRect().right > innerWidth + 1 && e.offsetParent !== null).slice(0, 6).map((e) => (e.className || e.tagName) + ':' + Math.round(e.getBoundingClientRect().right)),
     ...(window.PROBE ? window.PROBE() : {}) });
 })()`;
-for (const [name, hash] of extra ?? SHOTS) {
+for (const [name, hash, h = H] of extra ?? SHOTS) {
+  await send('Emulation.setDeviceMetricsOverride', { width: W, height: h, deviceScaleFactor: 1, mobile: false });
   await send('Page.navigate', { url: page + (hash ? '#' + hash : '') });
   await sleep(900);
   if (process.env.PROBE_JS) await send('Runtime.evaluate', { expression: (await import('node:fs')).readFileSync(process.env.PROBE_JS, 'utf8') });
   const r = await send('Runtime.evaluate', { expression: probe, returnByValue: true });
-  const shot = await send('Page.captureScreenshot', { format: 'png', clip: { x: 0, y: 0, width: W, height: H, scale: 1 } });
+  const shot = await send('Page.captureScreenshot', { format: 'png', clip: { x: 0, y: 0, width: W, height: h, scale: 1 } });
   writeFileSync(join(dest, name), Buffer.from(shot.result.data, 'base64'));
   console.log(name, r.result?.result?.value ?? JSON.stringify(r).slice(0, 200));
 }
